@@ -1,0 +1,24 @@
+{
+  "name": "udp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidmdm/comp_445_udp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidmdm/comp_445_udp/issues"
+  },
+  "homepage": "https://github.com/davidmdm/comp_445_udp#readme",
+  "dependencies": {
+    "moment": "^2.22.1"
+  },
+  "devDependencies": {},
+  "description": ""
+}

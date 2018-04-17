@@ -11,7 +11,7 @@ const rl = readline.createInterface({
 const inbound = process.env.TEST_MODE == 1 ? 3000 : 4000;
 const outbound = process.env.TEST_MODE == 1 ? 4000 : 3000;
 
-const { parse_message, build_message, print } = require('./utils');
+const { parse_message, build_message, print, log } = require('./utils');
 
 void (async function() {
   const socket = dgram.createSocket('udp4');
@@ -28,7 +28,8 @@ void (async function() {
   const join = build_message({ message: 'joining', command: 'JOIN', username });
   socket.send(join, outbound, '255.255.255.255');
 
-  console.log('\nYou have joined!\n');
+  console.log();
+  log(`${username} joined!\n`);
 
   socket.on('message', buffer => {
     const msg = parse_message(buffer);
@@ -38,7 +39,10 @@ void (async function() {
   });
 
   rl.on('line', message => {
-    const buffer = build_message({ username, message, command: 'TALK' });
+    const buffer = /^\/leave$/.test(message)
+      ? build_message({ username, message, command: 'LEAVE' })
+      : build_message({ username, message, command: 'TALK' });
+
     socket.send(buffer, outbound, '255.255.255.255');
     console.log();
   });
