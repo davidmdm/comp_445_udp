@@ -2,8 +2,10 @@
 
 const moment = require('moment');
 
-const log = str => {
-  console.log(`${moment().format('YYYY-MM-DD hh:mm:ss')} ${str}`);
+const users = [];
+
+const log = (...args) => {
+  console.log(`${moment().format('YYYY-MM-DD hh:mm:ss')}`, ...args);
 };
 
 const build_message = ({ message, command, username }) => {
@@ -12,20 +14,39 @@ const build_message = ({ message, command, username }) => {
 
 const parse_message = buffer => {
   const matches = buffer.toString().match(/^user:([^\n]*)\ncommand:([^\n]*)\nmessage:([^\n]*)\n\n$/);
-  if (!matches || !matches[1] || !matches[2]) {
+  if (!matches) {
     return false;
   }
-  if (!['JOIN', 'TALK', 'LEAVE'].includes(matches[2])) {
+
+  const [username, command, message] = matches.slice(1);
+
+  if (!username || !command) {
     return false;
   }
-  if (matches[2] === 'TALK' && !matches[3]) {
+  if (!['JOIN', 'TALK', 'LEAVE', 'WHO', 'QUIT'].includes(command)) {
     return false;
   }
-  return {
-    username: matches[1],
-    command: matches[2],
-    message: matches[3],
-  };
+  if (command === 'TALK' && !message) {
+    return false;
+  }
+
+  if (command === 'QUIT') {
+    console.log('Disconnecting from chat application...');
+    process.exit(0);
+  }
+
+  if (command === 'JOIN') {
+    users.push(username);
+  }
+
+  if (command === 'LEAVE') {
+    const index = users.indexOf(username);
+    if (index > -1) {
+      users.splice(index, 1);
+    }
+  }
+
+  return { username, command, message };
 };
 
 const print = data => {
@@ -39,8 +60,11 @@ const print = data => {
     case 'LEAVE':
       log(`${data.username} left!\n\n`);
       break;
+    case 'WHO':
+      log(JSON.stringify(users, null, 4), '\n');
+      break;
     default:
-      console.error('Recieved bad message\n');
+      console.error('Received bad message\n');
       break;
   }
 };
