@@ -8,22 +8,15 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const build_message = (msg, username) => {
-  return Buffer.from(`user:${username}\nmessage:${msg}\n\n`);
-};
+const inbound = process.env.TEST_MODE == 1 ? 3000 : 4000;
+const outbound = process.env.TEST_MODE == 1 ? 4000 : 3000;
 
-const parse_message = buffer => {
-  const matches = buffer.toString().match(/^user:([^\n]*)\nmessage:([^\n]*)\n\n$/);
-  if (!matches[1] || !matches[2]) {
-    return false;
-  }
-  return `${matches[1]}: ${matches[2]}\n`;
-};
+const { parse_message, build_message, print } = require('./utils');
 
 void (async function() {
   const socket = dgram.createSocket('udp4');
 
-  const err = await new Promise(resolve => socket.bind(3000, resolve));
+  const err = await new Promise(resolve => socket.bind(inbound, resolve));
   if (err) {
     console.error('could not create socket: %s', err.message);
     process.exit(1);
@@ -32,16 +25,21 @@ void (async function() {
   socket.setBroadcast(true);
 
   const username = await new Promise(resolve => rl.question('Enter your username: ', resolve));
+  const join = build_message({ message: 'joining', command: 'JOIN', username });
+  socket.send(join, outbound, '255.255.255.255');
+
+  console.log('\nYou have joined!\n');
 
   socket.on('message', buffer => {
     const msg = parse_message(buffer);
     if (msg) {
-      console.log(msg);
+      print(msg);
     }
   });
 
-  rl.on('line', line => {
-    socket.send(build_message(line, username), 4000, '255.255.255.255');
+  rl.on('line', message => {
+    const buffer = build_message({ username, message, command: 'TALK' });
+    socket.send(buffer, outbound, '255.255.255.255');
     console.log();
   });
 })();
