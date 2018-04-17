@@ -2,7 +2,9 @@
 
 const dgram = require('dgram');
 const readline = require('readline');
+const ip = require('ip');
 
+const myIP = ip.address();
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -29,7 +31,7 @@ void (async function() {
     process.exit(1);
   });
 
-  await new Promise(resolve => socket.bind(inbound, resolve));
+  await new Promise(resolve => socket.bind(inbound, myIP, resolve));
 
   const socketInfo = socket.address();
   socket.setBroadcast(true);

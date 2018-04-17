@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/davidmdm/comp_445_udp#readme",
   "dependencies": {
+    "ip": "^1.1.5",
     "moment": "^2.22.1"
   },
   "devDependencies": {},
