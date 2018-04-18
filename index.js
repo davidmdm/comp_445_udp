@@ -31,7 +31,7 @@ void (async function() {
     process.exit(1);
   });
 
-  await new Promise(resolve => socket.bind(inbound, myIP, resolve));
+  await new Promise(resolve => socket.bind(inbound, resolve));
 
   const socketInfo = socket.address();
   socket.setBroadcast(true);
@@ -39,7 +39,6 @@ void (async function() {
   const username = await new Promise(resolve => rl.question('Enter your username: ', resolve));
   const join = build_message({ message: 'joining', command: 'JOIN', username });
   socket.send(join, outbound, '255.255.255.255');
-  socket.send(join, socketInfo.port, socketInfo.address);
 
   socket.on('message', buffer => {
     const msg = parse_message(buffer);
@@ -51,7 +50,7 @@ void (async function() {
   rl.on('line', message => {
     if (/^\/who$/.test(message)) {
       const buffer = build_message({ username, message, command: 'WHO' });
-      socket.send(buffer, socketInfo.port, socketInfo.address);
+      socket.send(buffer, socketInfo.port, myIP);
       return console.log();
     }
 
@@ -59,7 +58,7 @@ void (async function() {
       const buffer = build_message({ username, message, command: 'LEAVE' });
       socket.send(buffer, outbound, '255.255.255.255');
       const buffer2 = build_message({ username, message: '/quit', command: 'QUIT' });
-      socket.send(buffer2, socketInfo.port, socketInfo.address);
+      socket.send(buffer2, socketInfo.port, myIP);
       return console.log();
     }
 
