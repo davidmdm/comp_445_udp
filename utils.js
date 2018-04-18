@@ -23,7 +23,7 @@ const parse_message = buffer => {
   if (!username || !command) {
     return false;
   }
-  if (!['JOIN', 'TALK', 'LEAVE', 'WHO', 'QUIT'].includes(command)) {
+  if (!['JOIN', 'TALK', 'LEAVE', 'WHO', 'QUIT', 'PING'].includes(command)) {
     return false;
   }
   if (command === 'TALK' && !message) {
@@ -46,6 +46,12 @@ const parse_message = buffer => {
     }
   }
 
+  if (command === 'PING') {
+    if (!users.includes(username)) {
+      users.push(username);
+    }
+  }
+
   return { username, command, message };
 };
 
@@ -64,7 +70,6 @@ const print = data => {
       log(JSON.stringify(users, null, 4), '\n');
       break;
     default:
-      console.error('Received bad message\n');
       break;
   }
 };

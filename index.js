@@ -42,6 +42,10 @@ void (async function() {
 
   socket.on('message', buffer => {
     const msg = parse_message(buffer);
+    if (msg.command === 'JOIN') {
+      const ping = build_message({ message: '/ping', command: 'PING', username });
+      socket.send(ping, outbound, '255.255.255.255');
+    }
     if (msg) {
       print(msg);
     }
